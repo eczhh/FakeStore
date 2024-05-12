@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
+import { cartActions } from '../store/cartSlice'; // Assuming this is the correct path to your cart slice
 
 const ProductDetailScreen = ({ route, navigation }) => {
   const { productId } = route.params;
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -41,8 +44,9 @@ const ProductDetailScreen = ({ route, navigation }) => {
   };
 
   const handleAddToCartPress = () => {
-    // Add your logic to add the product to the cart here
-    console.log('Add to cart pressed');
+    if (product) {
+      dispatch(cartActions.addToCart(product)); // Dispatch addToCart action with product data
+    }
   };
 
   return (
