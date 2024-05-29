@@ -1,10 +1,12 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image, Alert } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { cartActions } from '../store/cartSlice';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ShoppingCartScreen = () => {
+const ShoppingCartScreen = ({ navigation }) => {
   const cartItems = useSelector((state) => state.cart.items);
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const totalAmount = useSelector((state) => state.cart.totalAmount);
@@ -20,6 +22,39 @@ const ShoppingCartScreen = () => {
 
   const removeFromCartHandler = (id) => {
     dispatch(cartActions.removeFromCart(id));
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+
+      const orderData = {
+        order_items: cartItems.map((item) => ({
+          product_id: item.id,
+          quantity: item.quantity,
+        })),
+        total_price: totalAmount,
+      };
+
+      const response = await axios.post('http://localhost:3000/orders/neworder', {
+        items: cartItems
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        const orderId = response.data.orderId;
+        navigation.navigate('MyOrdersScreen', { orderId });
+        dispatch(cartActions.clearCart());
+      } else {
+        throw new Error('Failed to create order');
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      Alert.alert('Error', 'Failed to create order. Please try again later.');
+    }
   };
 
   const renderCartItem = ({ item }) => (
@@ -64,6 +99,9 @@ const ShoppingCartScreen = () => {
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderCartItem}
           />
+          <TouchableOpacity style={styles.checkoutButton} onPress={handleCheckout}>
+            <Text style={styles.checkoutButtonText}>Checkout</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -141,6 +179,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#FF4D4D',
     borderRadius: 20,
     padding: 5,
+  },
+  checkoutButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  checkoutButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
   },
 });
 

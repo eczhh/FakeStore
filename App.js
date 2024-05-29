@@ -8,6 +8,8 @@ import CategoryScreen from './screens/CategoryScreen';
 import ProductListScreen from './screens/ProductListScreen';
 import ProductDetailScreen from './screens/ProductDetailScreen';
 import ShoppingCartScreen from './screens/ShoppingCartScreen';
+import UserProfileScreen from './screens/UserProfileScreen';
+import MyOrdersScreen from './screens/MyOrdersScreen';
 import { Provider } from 'react-redux';
 import store from './store/store';
 import CartIcon from './components/CartIcon';
@@ -22,10 +24,10 @@ const App = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setShowSplash(false); // Hide the splash screen after 1.5 seconds
+      setShowSplash(false);
     }, 1500);
 
-    return () => clearTimeout(timer); // Cleanup the timer on unmounting
+    return () => clearTimeout(timer);
   }, []);
 
   if (showSplash) {
@@ -54,6 +56,16 @@ const App = () => {
           component={ProductDetailScreen}
           options={{ title: 'Product Details' }}
         />
+        <Stack.Screen
+          name="MyOrdersScreen"
+          component={MyOrdersScreen}
+          options={{ title: 'My Orders' }}
+        />
+        <Stack.Screen
+          name="UserProfileScreen"
+          component={UserProfileScreen}
+          options={{ title: 'User Profile' }}
+        />
       </Stack.Navigator>
     );
   };
@@ -69,6 +81,10 @@ const App = () => {
                 iconName = focused ? 'list' : 'list-outline';
               } else if (route.name === 'ShoppingCart') {
                 return <CartIcon color={color} size={size} />;
+              } else if (route.name === 'UserProfile') {
+                iconName = focused ? 'person' : 'person-outline';
+              } else if (route.name === 'MyOrders') {
+                iconName = focused ? 'cart' : 'cart-outline';
               }
               return <Ionicons name={iconName} size={size} color={color} />;
             },
@@ -76,6 +92,8 @@ const App = () => {
         >
           <Tab.Screen name="Products" component={ProductsNavigator} />
           <Tab.Screen name="ShoppingCart" component={ShoppingCartScreen} />
+          <Tab.Screen name="MyOrders" component={MyOrdersScreen} />
+          <Tab.Screen name="UserProfile" component={UserProfileScreen} />
         </Tab.Navigator>
       </NavigationContainer>
     </Provider>
